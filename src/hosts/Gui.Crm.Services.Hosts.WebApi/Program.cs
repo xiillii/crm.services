@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Gui.Crm.Services.Api
+namespace Gui.Crm.Services.Hosts.WebApi
 {
     public class Program
     {
