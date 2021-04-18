@@ -11,6 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Gui.Crm.Services.Data.Models;
+using Gui.Crm.Services.Data.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace Gui.Crm.Services.Hosts.WebApi
 {
@@ -28,6 +31,14 @@ namespace Gui.Crm.Services.Hosts.WebApi
         {
 
             services.AddControllers();
+
+            services.AddDbContext<CrmDbContext>(opts =>
+            {
+                opts.UseSqlServer(Configuration["ConnectionStrings:DatabaseConnection"],
+                    b => b.MigrationsAssembly("Gui.Crm.Services.Hosts.WebApi"));
+            });
+            services.AddScoped<ICrmRepository, EFCrmRepository>();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Gui.Crm.Services.Hosts.WebApi", Version = "v1" });

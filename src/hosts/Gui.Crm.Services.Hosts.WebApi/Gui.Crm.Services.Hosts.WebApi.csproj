@@ -13,4 +13,8 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\data\Gui.Crm.Services.Data\Gui.Crm.Services.Data.csproj" />
+  </ItemGroup>
+
 </Project>
