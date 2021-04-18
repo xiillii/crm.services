@@ -1,3 +1,4 @@
+using Gui.Crm.Services.Business.Logic.Mappings;
 using Gui.Crm.Services.Data.Models;
 using Gui.Crm.Services.Data.Repositories;
 using Microsoft.AspNetCore.Builder;
@@ -33,6 +34,7 @@ namespace Gui.Crm.Services.Hosts.WebApi
             services.AddTransient<IProductRepository, ProductRepository>();
             services.AddTransient<ICategoryRepository, CategoryRepository>();
 
+            services.AddAutoMapper(typeof(MappingProfile));
 
             services.AddSwaggerGen(c =>
             {

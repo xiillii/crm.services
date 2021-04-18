@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -19,8 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\business\Gui.Crm.Services.Business.Logic\Gui.Crm.Services.Business.Logic.csproj" />
     <ProjectReference Include="..\..\data\Gui.Crm.Services.Data.Entities\Gui.Crm.Services.Data.Entities.csproj" />
     <ProjectReference Include="..\..\data\Gui.Crm.Services.Data\Gui.Crm.Services.Data.csproj" />
+    <ProjectReference Include="..\..\shared\Gui.Crm.Services.Shared.Dtos\Gui.Crm.Services.Shared.Dtos.csproj" />
   </ItemGroup>
 
 </Project>

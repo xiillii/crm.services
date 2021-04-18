@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\data\Gui.Crm.Services.Data.Entities\Gui.Crm.Services.Data.Entities.csproj" />
+    <ProjectReference Include="..\..\shared\Gui.Crm.Services.Shared.Dtos\Gui.Crm.Services.Shared.Dtos.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,10 +1,14 @@
-﻿using Gui.Crm.Services.Data.Entities;
+﻿using System;
+using Gui.Crm.Services.Data.Entities;
 using Gui.Crm.Services.Data.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using Gui.Crm.Services.Shared.Dtos;
+using Gui.Crm.Services.Shared.Dtos.Responses;
 
 namespace Gui.Crm.Services.Hosts.WebApi.Controllers
 {
@@ -13,10 +17,12 @@ namespace Gui.Crm.Services.Hosts.WebApi.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly CrmDbContext _context;
+        private readonly IMapper _mapper;
 
-        public CategoriesController(CrmDbContext context)
+        public CategoriesController(CrmDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/Categories
@@ -28,7 +34,7 @@ namespace Gui.Crm.Services.Hosts.WebApi.Controllers
 
         // GET: api/Categories/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Category>> GetCategory(long id)
+        public async Task<ActionResult<CategoryResponse>> GetCategory(long id)
         {
             var category = await _context.Categories.FindAsync(id);
 
@@ -37,7 +43,16 @@ namespace Gui.Crm.Services.Hosts.WebApi.Controllers
                 return NotFound();
             }
 
-            return category;
+            var c = _mapper.Map<DtoCategory>(category);
+
+
+            return new CategoryResponse
+            {
+                Data = c,
+                Date = DateTimeOffset.UtcNow,
+                ResponseId = Guid.NewGuid(),
+                Status = Status.Succeeded
+            };
         }
 
         // PUT: api/Categories/5
