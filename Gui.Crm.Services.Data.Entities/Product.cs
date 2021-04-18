@@ -17,5 +17,8 @@ namespace Gui.Crm.Services.Data.Entities
         public decimal Price { get; set; }
 
         public bool Status { get; set; }
+
+        public long CategoryId { get; set; }
+        public Category Category { get; set; }
     }
 }

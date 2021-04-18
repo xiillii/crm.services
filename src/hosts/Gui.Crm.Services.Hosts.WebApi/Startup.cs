@@ -38,6 +38,7 @@ namespace Gui.Crm.Services.Hosts.WebApi
                     b => b.MigrationsAssembly("Gui.Crm.Services.Hosts.WebApi"));
             });
             services.AddScoped<ICrmRepository, EFCrmRepository>();
+            services.AddTransient<ICategoryRepository, CategoryRepository>();
 
             services.AddSwaggerGen(c =>
             {
