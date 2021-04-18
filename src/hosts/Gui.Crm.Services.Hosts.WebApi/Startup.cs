@@ -40,6 +40,7 @@ namespace Gui.Crm.Services.Hosts.WebApi
             services.AddTransient<IProductRepository, ProductRepository>();
             services.AddTransient<ICategoryRepository, CategoryRepository>();
 
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Gui.Crm.Services.Hosts.WebApi", Version = "v1" });
