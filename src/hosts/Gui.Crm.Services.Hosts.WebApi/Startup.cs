@@ -37,7 +37,7 @@ namespace Gui.Crm.Services.Hosts.WebApi
                 opts.UseSqlServer(Configuration["ConnectionStrings:DatabaseConnection"],
                     b => b.MigrationsAssembly("Gui.Crm.Services.Hosts.WebApi"));
             });
-            services.AddScoped<ICrmRepository, EFCrmRepository>();
+            services.AddTransient<IProductRepository, ProductRepository>();
             services.AddTransient<ICategoryRepository, CategoryRepository>();
 
             services.AddSwaggerGen(c =>
