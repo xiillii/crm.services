@@ -14,5 +14,6 @@ namespace Gui.Crm.Services.Data.Repositories
         }
 
         public IQueryable<Product> Products => context.Products;
+        public IQueryable<Category> Categories => context.Categories;
     }
 }
