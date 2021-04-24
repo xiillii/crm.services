@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Gui.Crm.Services.Shared.Dtos;
+using Gui.Crm.Services.Shared.Dtos.Requests;
 using Gui.Crm.Services.Shared.Dtos.Responses;
 
 namespace Gui.Crm.Services.Hosts.WebApi.Controllers
@@ -27,9 +28,18 @@ namespace Gui.Crm.Services.Hosts.WebApi.Controllers
 
         // GET: api/Categories
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
+        public async Task<ActionResult<CategoriesResponse>> GetCategories()
         {
-            return await _context.Categories.ToListAsync();
+            var lst = await _context.Categories.ToListAsync();
+
+            var categories = _mapper.Map<List<DtoCategory>>(lst);
+            return new CategoriesResponse
+            {
+                Data = categories,
+                ResponseId = Guid.NewGuid(),
+                Date = DateTimeOffset.UtcNow,
+                Status = Status.Succeeded
+            };
         }
 
         // GET: api/Categories/5
@@ -58,14 +68,13 @@ namespace Gui.Crm.Services.Hosts.WebApi.Controllers
         // PUT: api/Categories/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(long id, Category category)
+        public async Task<IActionResult> PutCategory(long id, CategoryUpdateRequest category)
         {
-            if (id != category.CategoryId)
-            {
-                return BadRequest();
-            }
+            var cat = _mapper.Map<Category>(category.Data);
 
-            _context.Entry(category).State = EntityState.Modified;
+            cat.CategoryId = id;
+
+            _context.Entry(cat).State = EntityState.Modified;
 
             try
             {
@@ -89,12 +98,23 @@ namespace Gui.Crm.Services.Hosts.WebApi.Controllers
         // POST: api/Categories
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Category>> PostCategory(Category category)
+        public async Task<ActionResult<Category>> PostCategory(CategoryAddRequest category)
         {
-            _context.Categories.Add(category);
+            var cat = _mapper.Map<Category>(category.Data);
+            cat.Status = true;
+
+            _context.Categories.Add(cat);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCategory", new { id = category.CategoryId }, category);
+            var getResponse = new CategoryResponse
+            {
+                Data = _mapper.Map<DtoCategory>(cat),
+                Date = DateTimeOffset.UtcNow,
+                ResponseId = Guid.NewGuid(),
+                Status = Status.Succeeded
+            };
+
+            return CreatedAtAction("GetCategory", new { id = cat.CategoryId }, getResponse);
         }
 
         // DELETE: api/Categories/5

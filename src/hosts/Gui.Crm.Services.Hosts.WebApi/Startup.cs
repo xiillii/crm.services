@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Gui.Crm.Services.Business.Logic.Mappings;
 using Gui.Crm.Services.Data.Models;
 using Gui.Crm.Services.Data.Repositories;
@@ -24,7 +25,12 @@ namespace Gui.Crm.Services.Hosts.WebApi
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddControllers();
+            services.AddControllers()
+                .AddJsonOptions(opt =>
+                {
+                    opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    opt.JsonSerializerOptions.IgnoreNullValues = true;
+                });
 
             services.AddDbContext<CrmDbContext>(opts =>
             {
@@ -35,6 +41,8 @@ namespace Gui.Crm.Services.Hosts.WebApi
             services.AddTransient<ICategoryRepository, CategoryRepository>();
 
             services.AddAutoMapper(typeof(MappingProfile));
+
+            
 
             services.AddSwaggerGen(c =>
             {

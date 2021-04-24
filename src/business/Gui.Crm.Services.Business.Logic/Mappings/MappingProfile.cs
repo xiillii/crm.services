@@ -10,6 +10,8 @@ namespace Gui.Crm.Services.Business.Logic.Mappings
         {
             CreateMap<Category, DtoCategory>()
                 .ForMember(dest => dest.Id, source => source.MapFrom(source => source.CategoryId)).ReverseMap();
+            CreateMap<Category, DtoCategoryUpdate>().ReverseMap();
+            CreateMap<Category, DtoCategoryAdd>().ReverseMap();
         }
     }
 }
