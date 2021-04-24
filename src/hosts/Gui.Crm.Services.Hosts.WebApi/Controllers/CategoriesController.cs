@@ -10,6 +10,7 @@ using AutoMapper;
 using Gui.Crm.Services.Shared.Dtos;
 using Gui.Crm.Services.Shared.Dtos.Requests;
 using Gui.Crm.Services.Shared.Dtos.Responses;
+using Microsoft.AspNetCore.Routing;
 
 namespace Gui.Crm.Services.Hosts.WebApi.Controllers
 {
@@ -19,30 +20,113 @@ namespace Gui.Crm.Services.Hosts.WebApi.Controllers
     {
         private readonly CrmDbContext _context;
         private readonly IMapper _mapper;
+        private readonly LinkGenerator _linkGenerator;
 
-        public CategoriesController(CrmDbContext context, IMapper mapper)
+        public CategoriesController(CrmDbContext context, IMapper mapper, LinkGenerator linkGenerator)
         {
             _context = context;
             _mapper = mapper;
+            _linkGenerator = linkGenerator;
         }
 
         // GET: api/Categories
         [HttpGet]
-        public async Task<ActionResult<CategoriesResponse>> GetCategories([FromQuery] string code = null,
-            [FromQuery] string name = null, [FromQuery] bool? status = null)
+        public async Task<ActionResult<CategoriesResponse>> GetCategories(
+            [FromQuery] string code = null,
+            [FromQuery] string name = null, [FromQuery] bool? status = null, 
+            [FromQuery] int? limit = null,
+            [FromQuery] int? offset = null)
         {
-            var lst = await _context.Categories.Where(c =>
-                (code == null || c.Code == code) && (name == null || c.Name == name) &&
-                (status == null || c.Status == status)).ToListAsync();
-            
+            if ((limit != null && offset == null) || (limit == null && offset != null))
+            {
+                return BadRequest();
+            }
+
+            if (limit <= 0 || offset  <= 0)
+            {
+                return BadRequest();
+            }
+
+            List<Category> lst = null;
+            ListLinks listLinks = null;
+
+            if (limit == null)
+            {
+                lst = await _context.Categories.Where(c =>
+                    (code == null || c.Code == code) && (name == null || c.Name == name) &&
+                    (status == null || c.Status == status)).ToListAsync();
+            }
+            else
+            {
+                var myLimit = limit ?? 0;
+                var myOffset = offset ?? 0;
+                var count = (await _context.Categories.Where(c =>
+                    (code == null || c.Code == code) && (name == null || c.Name == name) &&
+                    (status == null || c.Status == status)).ToListAsync())?.Count;
+                lst = await _context.Categories.Where(c =>
+                    (code == null || c.Code == code) && (name == null || c.Name == name) &&
+                    (status == null || c.Status == status)).Skip((myOffset - 1) * myLimit).Take(myLimit).ToListAsync();
+
+                listLinks = new ListLinks
+                {
+                    Base = $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}"
+                };
+                listLinks = CreateResponseListLinks(lst, myLimit, myOffset, count ?? 0);
+
+            }
+
 
             var categories = _mapper.Map<List<DtoCategory>>(lst);
+
+            var categoriesList = categories.Select(category => CreateLinksForCategory(category));
             return new CategoriesResponse
             {
-                Data = categories,
-                ResponseId = Guid.NewGuid(),
-                Date = DateTimeOffset.UtcNow,
-                Status = Status.Succeeded
+                Value = categoriesList.ToList(),
+                Meta = new DtoMeta
+                {
+                    ResponseId = Guid.NewGuid(),
+                    Date = DateTimeOffset.UtcNow,
+                    Status = Status.Succeeded,
+                },
+                Size = limit,
+                Start = offset,
+
+                _links = listLinks,
+            };
+        }
+
+        private DtoCategory CreateLinksForCategory(DtoCategory category)
+        {
+            var objId = new {id = category.Id};
+            category.Links = new List<LinkDto>();
+            category.Links.Add(
+                new LinkDto(_linkGenerator.GetPathByAction(nameof(this.GetCategory), "Categories", objId), "self", "GET"));
+            category.Links.Add(
+                new LinkDto(_linkGenerator.GetPathByAction(nameof(this.PutCategory), "Categories", objId), "update_category", "PUT"));
+            category.Links.Add(
+                new LinkDto(_linkGenerator.GetPathByAction(nameof(this.DeleteCategory), "Categories", objId), "delete_category", "DELETE"));
+
+            return category;
+        }
+
+        private ListLinks CreateResponseListLinks(List<Category> lst, int limit, int offset, int count)
+        {
+
+
+            return new ListLinks
+            {
+                Base = $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}",
+                Context = "",
+                Next = lst.Count == limit &&  offset * limit < count
+                    ? this._linkGenerator.GetPathByAction(nameof(this.GetCategories), "Categories",
+                        new {limit = limit, offset = offset + 1})
+                    : null,
+                Prev = offset > 1
+                    ? _linkGenerator.GetPathByAction(nameof(this.GetCategories), "Categories",
+                        new {limit = limit, offset = offset - 1})
+                    : null,
+                Self = _linkGenerator.GetPathByAction(nameof(this.GetCategories), "Categories",
+                    new {limit = limit, offset = offset})
             };
         }
 
@@ -59,13 +143,17 @@ namespace Gui.Crm.Services.Hosts.WebApi.Controllers
 
             var c = _mapper.Map<DtoCategory>(category);
 
+            c = CreateLinksForCategory(c);
 
             return new CategoryResponse
             {
-                Data = c,
-                Date = DateTimeOffset.UtcNow,
-                ResponseId = Guid.NewGuid(),
-                Status = Status.Succeeded
+                Value = c,
+                Meta = new DtoMeta
+                {
+                    Date = DateTimeOffset.UtcNow,
+                    ResponseId = Guid.NewGuid(),
+                    Status = Status.Succeeded
+                }
             };
         }
 
@@ -110,15 +198,21 @@ namespace Gui.Crm.Services.Hosts.WebApi.Controllers
             _context.Categories.Add(cat);
             await _context.SaveChangesAsync();
 
+            var myCategory = _mapper.Map<DtoCategory>(cat);
+            myCategory = CreateLinksForCategory(myCategory);
             var getResponse = new CategoryResponse
             {
-                Data = _mapper.Map<DtoCategory>(cat),
-                Date = DateTimeOffset.UtcNow,
-                ResponseId = Guid.NewGuid(),
-                Status = Status.Succeeded
+                Value = myCategory,
+                Meta = new DtoMeta
+                {
+                    Date = DateTimeOffset.UtcNow,
+                    ResponseId = Guid.NewGuid(),
+                    Status = Status.Succeeded
+                }
             };
 
-            return CreatedAtAction("GetCategory", new { id = cat.CategoryId }, getResponse);
+
+            return CreatedAtAction("GetCategory", new {id = cat.CategoryId}, getResponse);
         }
 
         // DELETE: api/Categories/5

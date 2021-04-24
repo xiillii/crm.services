@@ -2,6 +2,6 @@
 {
     public class CategoryResponse : BaseResponse
     {
-        public DtoCategory Data { get; set; }
+        public DtoCategory Value { get; set; }
     }
 }

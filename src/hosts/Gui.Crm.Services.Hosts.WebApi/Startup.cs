@@ -4,6 +4,9 @@ using Gui.Crm.Services.Data.Models;
 using Gui.Crm.Services.Data.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +42,8 @@ namespace Gui.Crm.Services.Hosts.WebApi
             });
             services.AddTransient<IProductRepository, ProductRepository>();
             services.AddTransient<ICategoryRepository, CategoryRepository>();
+
+            
 
             services.AddAutoMapper(typeof(MappingProfile));
 
