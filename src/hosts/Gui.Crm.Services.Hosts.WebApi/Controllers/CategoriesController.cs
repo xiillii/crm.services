@@ -28,9 +28,13 @@ namespace Gui.Crm.Services.Hosts.WebApi.Controllers
 
         // GET: api/Categories
         [HttpGet]
-        public async Task<ActionResult<CategoriesResponse>> GetCategories()
+        public async Task<ActionResult<CategoriesResponse>> GetCategories([FromQuery] string code = null,
+            [FromQuery] string name = null, [FromQuery] bool? status = null)
         {
-            var lst = await _context.Categories.ToListAsync();
+            var lst = await _context.Categories.Where(c =>
+                (code == null || c.Code == code) && (name == null || c.Name == name) &&
+                (status == null || c.Status == status)).ToListAsync();
+            
 
             var categories = _mapper.Map<List<DtoCategory>>(lst);
             return new CategoriesResponse
